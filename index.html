@@ -82,7 +82,7 @@
 
     const paddleWidth = 14, paddleHeight = 100;
     const ballSize = 10;
-    const maxScore = 10;
+    const maxScore = 3;
     const maxBallSpeed = 12;
 
     let isGameOver = false;
@@ -93,7 +93,7 @@
     let ball = {
       x: canvas.width / 2,
       y: canvas.height / 2,
-      speed: 5,
+      speed: 8,
       velocityX: 5,
       velocityY: 5,
       size: ballSize,
@@ -143,6 +143,8 @@
       ball.y += ball.velocityY;
 
       ai.y += ((ball.y - (ai.y + paddleHeight / 2))) * 0.1;
+      ai.y = Math.max(0, Math.min(canvas.height - paddleHeight, ai.y));
+
 
       // Prevent clipping (adds 1 pixel of margin at top and bottom)
       // Ball-wall collision (top and bottom) - using radius
@@ -166,7 +168,7 @@
         let direction = (ball.x < canvas.width / 2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
-        ball.speed = Math.min(ball.speed + 0.2, maxBallSpeed);
+        ball.speed = Math.min(ball.speed + 0.5, maxBallSpeed);
       }
 
       if (ball.x < 0) {
@@ -213,6 +215,12 @@
   if (isPaused || isGameOver) return;
   let rect = canvas.getBoundingClientRect();
   player.y = evt.clientY - rect.top - paddleHeight / 2;
+  // Clamp player paddle within bounds
+  player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
+
+  // Clamp AI paddle within bounds
+  ai.y = Math.max(0, Math.min(canvas.height - paddleHeight, ai.y));
+
 });
 
 
