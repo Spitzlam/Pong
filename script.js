@@ -10,10 +10,13 @@ const modeToggle = document.getElementById("modeToggle");
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
-const maxScore = 3;
+const maxScore = 10;
 const maxBallSpeed = 12;
 const paddleSpeed = 8;
 
+let showFPS = false;
+let fps = 0;
+let lastFrameTime = performance.now();
 
 
 let isGameOver = false;
@@ -148,7 +151,8 @@ function render() {
   drawRect(ai.x, ai.y, paddleWidth, paddleHeight);
   drawCircle(ball.x, ball.y, ball.size);
 
-  if (isGameOver) {
+  if (isGameOver) 
+  {
     drawText("Game Over", canvas.width / 2 - 90, canvas.height / 2);
     const message = player.score > ai.score ? "Player 1 Wins!" : "Player 2 Wins!";
     drawText(message, canvas.width / 2 - 100, canvas.height / 2 + 40);
@@ -156,6 +160,11 @@ function render() {
   } else if (isPaused) {
     drawText("Paused", canvas.width / 2 - 50, canvas.height / 2);
   }
+  if (showFPS) 
+  {
+    drawText(`FPS: ${fps}`, 20, 30, "16px");
+  }
+
 }
 
 function game() {
@@ -165,7 +174,22 @@ function game() {
   render();
 }
 
-setInterval(game, 1000 / 60);
+function gameLoop(currentTime) {
+  const delta = currentTime - lastFrameTime;
+  lastFrameTime = currentTime;
+
+  if (showFPS) {
+    fps = Math.round(1000 / delta);
+  }
+
+  game();
+
+  requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+
+
 
 document.addEventListener("mousemove", (evt) => {
   if (isPaused || isGameOver || !useAI) return;
@@ -224,6 +248,10 @@ modeToggle.addEventListener("click", () => {
   resetBall();
 });
 
-  
+  const fpsToggle = document.getElementById("fpsToggle");
+fpsToggle.addEventListener("click", () => {
+  showFPS = !showFPS;
+});
+
 
 updateScoreboard();
