@@ -169,9 +169,11 @@ setInterval(game, 1000 / 60);
 
 document.addEventListener("mousemove", (evt) => {
   if (isPaused || isGameOver || !useAI) return;
-  let rect = canvas.getBoundingClientRect();
-  player.y = evt.clientY - rect.top - paddleHeight / 2;
+  const rect = canvas.getBoundingClientRect();
+  const scaleY = canvas.height / rect.height;
+  player.y = (evt.clientY - rect.top) * scaleY - paddleHeight / 2;
 });
+
 
 document.addEventListener("keydown", (evt) => {
   if (evt.key === "w" || evt.key === "W") player1Up = true;
@@ -212,10 +214,16 @@ pauseToggle.addEventListener("click", () => {
 });
 
 modeToggle.addEventListener("click", () => {
-    useAI = !useAI;
-    modeToggle.textContent = useAI ? "Switch to Multiplayer" : "Switch to AI";
-    updateScoreboard();
-  });
+  useAI = !useAI;
+  modeToggle.textContent = useAI ? "Switch to Multiplayer" : "Switch to AI";
+
+  // Reset scores
+  player.score = 0;
+  ai.score = 0;
+  updateScoreboard();
+  resetBall();
+});
+
   
 
 updateScoreboard();
