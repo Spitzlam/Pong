@@ -14,9 +14,13 @@ const maxScore = 10;
 const maxBallSpeed = 12;
 const paddleSpeed = 8;
 
-let showFPS = false;
+const TARGET_FPS = 60;
+const FRAME_DURATION = 1000 / TARGET_FPS;
+
+let lastFrameTime = 0;
 let fps = 0;
-let lastFrameTime = performance.now();
+let showFPS = false;
+
 
 
 let isGameOver = false;
@@ -174,20 +178,31 @@ function game() {
   render();
 }
 
-function gameLoop(currentTime) {
-  const delta = currentTime - lastFrameTime;
-  lastFrameTime = currentTime;
 
-  if (showFPS) {
-    fps = Math.round(1000 / delta);
+function gameLoop(currentTime) {
+  if (!lastFrameTime) {
+    lastFrameTime = currentTime;
   }
 
-  game();
+  const delta = currentTime - lastFrameTime;
+
+  if (delta >= FRAME_DURATION) {
+    // For smoother frame alignment
+    lastFrameTime = currentTime - (delta % FRAME_DURATION);
+
+    if (showFPS) {
+      fps = Math.round(1000 / delta);
+    }
+
+    game();
+  }
 
   requestAnimationFrame(gameLoop);
 }
 
 requestAnimationFrame(gameLoop);
+
+
 
 
 
