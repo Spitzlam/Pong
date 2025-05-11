@@ -6,7 +6,11 @@ const pauseToggle = document.getElementById("pauseToggle");
 const scoreboard = document.getElementById("scoreboard");
 const modeToggle = document.getElementById("modeToggle");
 
-
+const mainMenu = document.getElementById("main-menu");
+const startGameBtn = document.getElementById("startGame");
+const bestDisplay = document.getElementById("bestDisplay");
+const gameContainer = document.getElementById("game-container");
+const controls = document.getElementById("controls");
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
@@ -14,14 +18,20 @@ const maxScore = 10;
 const maxBallSpeed = 12;
 const paddleSpeed = 8;
 
+const bgColorPicker = document.getElementById("bgColorPicker");
+const fgColorPicker = document.getElementById("fgColorPicker");
+
 const TARGET_FPS = 60;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 
+let gameStarted = false;
+
+let isWaiting = false;
+let waitTimer = 0;
+
+const waitDuration = 1000; // 3 second delay
+
 let lastFrameTime = 0;
-let fps = 0;
-let showFPS = false;
-
-
 
 let isGameOver = false;
 let isPaused = false;
@@ -69,8 +79,12 @@ function drawText(text, x, y, size = "32px") {
 function resetBall() {
   ball.x = canvas.width / 2;
   ball.y = canvas.height / 2;
-  ball.velocityX = -ball.velocityX;
   ball.speed = 5;
+  ball.velocityX = 0;
+  ball.velocityY = 0;
+
+  isWaiting = true;
+  waitStart = performance.now();
 }
 
 function collision(b, p) {
@@ -89,6 +103,22 @@ function updateScoreboard() {
   
 
 function update() {
+  if (isWaiting) {
+  const now = performance.now();
+  const elapsed = now - waitStart;
+
+  if (elapsed >= waitDuration) {
+    const angle = (Math.random() * Math.PI / 2) - (Math.PI / 4);
+    const direction = Math.random() < 0.5 ? 1 : -1;
+
+    ball.velocityX = direction * ball.speed * Math.cos(angle);
+    ball.velocityY = ball.speed * Math.sin(angle);
+    isWaiting = false;
+  }
+
+  return; // Skip update while waiting
+}
+
   // Player controls
   if (!useAI) {
     // Player 1 (W/S)
@@ -164,19 +194,18 @@ function render() {
   } else if (isPaused) {
     drawText("Paused", canvas.width / 2 - 50, canvas.height / 2);
   }
-  if (showFPS) 
-  {
-    drawText(`FPS: ${fps}`, 20, 30, "16px");
-  }
 
 }
 
 function game() {
+  if (!gameStarted) return;
+
   if (!isGameOver && !isPaused) {
     update();
   }
   render();
 }
+
 
 
 function gameLoop(currentTime) {
@@ -190,10 +219,6 @@ function gameLoop(currentTime) {
     // For smoother frame alignment
     lastFrameTime = currentTime - (delta % FRAME_DURATION);
 
-    if (showFPS) {
-      fps = Math.round(1000 / delta);
-    }
-
     game();
   }
 
@@ -202,9 +227,41 @@ function gameLoop(currentTime) {
 
 requestAnimationFrame(gameLoop);
 
+function updateBestResult() {
+  const winner = player.score > ai.score ? "Player 1" : (useAI ? "AI" : "Player 2");
+  const difference = Math.abs(player.score - ai.score);
+  const winningScore = Math.max(player.score, ai.score);
 
+  const saved = JSON.parse(localStorage.getItem("bestResult")) || { difference: 0 };
 
+  if (difference > saved.difference) {
+    const bestResult = {
+      winner,
+      score: winningScore,
+      difference
+    };
+    localStorage.setItem("bestResult", JSON.stringify(bestResult));
+    displayBestResult(bestResult);
+  }
+}
 
+function displayBestResult(data) {
+  const bestDiv = document.getElementById("bestResult");
+  if (data) {
+    bestDiv.textContent = `Best Win: ${data.winner} scored ${data.score} (diff ${data.difference})`;
+  } else {
+    bestDiv.textContent = "Best Win: None yet";
+  }
+}
+
+function applyCustomColors(bgColor, fgColor) {
+  document.documentElement.style.setProperty('--bg-color', bgColor);
+  document.documentElement.style.setProperty('--fg-color', fgColor);
+  document.documentElement.style.setProperty('--border-color', fgColor);
+
+  // Save to localStorage
+  localStorage.setItem("pongColors", JSON.stringify({ bgColor, fgColor }));
+}
 
 document.addEventListener("mousemove", (evt) => {
   if (isPaused || isGameOver || !useAI) return;
@@ -252,6 +309,20 @@ pauseToggle.addEventListener("click", () => {
   pauseToggle.textContent = isPaused ? "Resume" : "Pause";
 });
 
+gameContainer.classList.add("hidden");
+controls.classList.add("hidden");
+
+startGameBtn.addEventListener("click", () => 
+{
+  mainMenu.classList.add("hidden");
+  gameContainer.classList.remove("hidden");
+  controls.classList.remove("hidden");
+  gameStarted = true;
+  const bgColor = bgColorPicker.value;
+  const fgColor = fgColorPicker.value;
+  applyCustomColors(bgColor, fgColor);
+});
+
 modeToggle.addEventListener("click", () => {
   useAI = !useAI;
   modeToggle.textContent = useAI ? "Switch to Multiplayer" : "Switch to AI";
@@ -263,10 +334,20 @@ modeToggle.addEventListener("click", () => {
   resetBall();
 });
 
-  const fpsToggle = document.getElementById("fpsToggle");
-fpsToggle.addEventListener("click", () => {
-  showFPS = !showFPS;
-});
+const savedBest = JSON.parse(localStorage.getItem("bestResult"));
+if (savedBest) {
+  displayBestResult(savedBest);
+  bestDisplay.textContent = `Best Win: ${savedBest.winner} scored ${savedBest.score} (diff ${savedBest.difference})`;
+} else {
+  displayBestResult(null);
+  bestDisplay.textContent = "Best Win: None yet";
+}
 
+const savedColors = JSON.parse(localStorage.getItem("pongColors"));
+if (savedColors) {
+  bgColorPicker.value = savedColors.bgColor;
+  fgColorPicker.value = savedColors.fgColor;
+  applyCustomColors(savedColors.bgColor, savedColors.fgColor);
+}
 
 updateScoreboard();

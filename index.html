@@ -7,13 +7,27 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="dark">
+
+  <div id="main-menu">
+  <h1>PONG</h1>
+  <p id="bestDisplay">Best Win: None yet</p>
+  <button id="modeToggle">Switch to Multiplayer</button>
+  <label>
+  Background Color:
+  <input type="color" id="bgColorPicker" value="#111111" />
+  </label>
+  <label>
+  Paddle/Ball Color:
+  <input type="color" id="fgColorPicker" value="#ffffff" />
+  </label>
+  <button id="startGame">Start Game</button>
+  </div>
+
   <div id="controls">
     <div id="scoreboard">Player: 0 — AI: 0</div>
     <div>
       <button id="pauseToggle">Pause</button>
       <button id="themeToggle">Toggle Mode</button>
-      <button id="modeToggle">Switch to Multiplayer</button>
-      <button id="fpsToggle">Toggle FPS</button>
     </div>
   </div>
 
