@@ -5,6 +5,7 @@ const themeToggle = document.getElementById("themeToggle");
 const pauseToggle = document.getElementById("pauseToggle");
 const scoreboard = document.getElementById("scoreboard");
 const modeToggle = document.getElementById("modeToggle");
+const menuButton = document.getElementById("menuButton");
 
 const mainMenu = document.getElementById("main-menu");
 const startGameBtn = document.getElementById("startGame");
@@ -15,16 +16,33 @@ const controls = document.getElementById("controls");
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
 const maxScore = 10;
-const maxBallSpeed = 12;
+const maxBallSpeed = 20;
 const paddleSpeed = 8;
+
+const sounds = {
+  paddle: new Audio("sounds/pong.mp3"),
+  wall: new Audio("sounds/bounce.mp3"),
+  score: new Audio("sounds/score.mp3"),
+};
 
 const bgColorPicker = document.getElementById("bgColorPicker");
 const fgColorPicker = document.getElementById("fgColorPicker");
 
+const muteToggle = document.getElementById("muteToggle");
+const muteToggleMenu = document.getElementById("muteToggleMenu");
+
 const TARGET_FPS = 60;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 
+const player1NameInput = document.getElementById("player1NameInput");
+const player2NameInput = document.getElementById("player2NameInput");
+const player2Label = document.getElementById("player2Label");
+
+let player1Name = "Player 1";
+let player2Name = "Player 2";
+
 let gameStarted = false;
+let showingVictoryScreen = false;
 
 let isWaiting = false;
 let waitTimer = 0;
@@ -35,6 +53,8 @@ let lastFrameTime = 0;
 
 let isGameOver = false;
 let isPaused = false;
+
+let isMuted = false;
 
 let player = { x: 0, y: canvas.height / 2 - paddleHeight / 2, score: 0 };
 let ai = { x: canvas.width - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, score: 0 };
@@ -51,7 +71,7 @@ let player2Down = false;
 let ball = {
   x: canvas.width / 2,
   y: canvas.height / 2,
-  speed: 8,
+  speed: 5,
   velocityX: 5,
   velocityY: 5,
   size: ballSize,
@@ -103,10 +123,39 @@ function updateScoreboard() {
   
 
 function update() {
-  if (isWaiting) {
+
+  if (ai.score >= maxScore) {
+  isGameOver = true;
+  showingVictoryScreen = true;
+  updateBestResult();
+  setTimeout(() => 
+  {
+  showingVictoryScreen = false;
+  isGameOver = false;
+  goToMainMenu();
+  resetBall();
+  }, 3000);
+
+}
+
+  if (player.score >= maxScore) {
+  isGameOver = true;
+  showingVictoryScreen = true;
+  updateBestResult();
+  setTimeout(() => 
+  {
+  showingVictoryScreen = false;
+  isGameOver = false;
+  goToMainMenu();
+  resetBall();
+  }, 3000);
+}
+
+ if (showingVictoryScreen) return;
   const now = performance.now();
   const elapsed = now - waitStart;
 
+if (isWaiting) {
   if (elapsed >= waitDuration) {
     const angle = (Math.random() * Math.PI / 2) - (Math.PI / 4);
     const direction = Math.random() < 0.5 ? 1 : -1;
@@ -116,8 +165,9 @@ function update() {
     isWaiting = false;
   }
 
-  return; // Skip update while waiting
+  return; // 
 }
+
 
   // Player controls
   if (!useAI) {
@@ -148,13 +198,22 @@ function update() {
   if (ball.y - ball.size <= 0) {
     ball.y = ball.size;
     ball.velocityY = -ball.velocityY;
+    sounds.wall.currentTime = 0;
+    sounds.wall.play();
+
   } else if (ball.y + ball.size >= canvas.height) {
     ball.y = canvas.height - ball.size;
     ball.velocityY = -ball.velocityY;
+    sounds.wall.currentTime = 0;
+    sounds.wall.play();
+
   }
 
   let playerPaddle = (ball.x < canvas.width / 2) ? player : ai;
+
   if (collision(ball, playerPaddle)) {
+    sounds.paddle.currentTime = 0;
+    sounds.paddle.play();
     let collidePoint = ball.y - (playerPaddle.y + paddleHeight / 2);
     collidePoint /= (paddleHeight / 2);
     let angleRad = (Math.PI / 4) * collidePoint;
@@ -165,16 +224,29 @@ function update() {
   }
 
   if (ball.x < 0) {
-    ai.score++;
-    updateScoreboard();
-    if (ai.score >= maxScore) isGameOver = true;
-    resetBall();
-  } else if (ball.x > canvas.width) {
-    player.score++;
-    updateScoreboard();
-    if (player.score >= maxScore) isGameOver = true;
-    resetBall();
+  ai.score++;
+  updateScoreboard();
+  if (ai.score >= maxScore) {
+    isGameOver = true;
+    updateBestResult();
+    setTimeout(goToMainMenu, 3000); // wait 3 seconds
   }
+  resetBall();
+  sounds.score.currentTime = 0;
+  sounds.score.play();
+} else if (ball.x > canvas.width) {
+  player.score++;
+  updateScoreboard();
+  if (player.score >= maxScore) {
+    isGameOver = true;
+    updateBestResult();
+    setTimeout(goToMainMenu, 3000); // wait 3 seconds
+  }
+  resetBall();
+  sounds.score.currentTime = 0;
+  sounds.score.play();
+}
+
 }
 
 function render() {
@@ -185,13 +257,22 @@ function render() {
   drawRect(ai.x, ai.y, paddleWidth, paddleHeight);
   drawCircle(ball.x, ball.y, ball.size);
 
-  if (isGameOver) 
+if (isGameOver) {
+  drawText("Game Over", canvas.width / 2 - 90, canvas.height / 2);
+
+  let winnerMessage;
+  if (player.score > ai.score) {
+    winnerMessage = "Player 1 Wins!";
+  } else {
+    winnerMessage = useAI ? "AI Wins!" : "Player 2 Wins!";
+  }
+
+  drawText(winnerMessage, canvas.width / 2 - 100, canvas.height / 2 + 40);
+  drawText("Returning to menu...", canvas.width / 2 - 110, canvas.height / 2 + 80, "20px");
+}
+
+  else if (isPaused) 
   {
-    drawText("Game Over", canvas.width / 2 - 90, canvas.height / 2);
-    const message = player.score > ai.score ? "Player 1 Wins!" : "Player 2 Wins!";
-    drawText(message, canvas.width / 2 - 100, canvas.height / 2 + 40);
-    drawText("Click to restart", canvas.width / 2 - 100, canvas.height / 2 + 80, "20px");
-  } else if (isPaused) {
     drawText("Paused", canvas.width / 2 - 50, canvas.height / 2);
   }
 
@@ -200,11 +281,13 @@ function render() {
 function game() {
   if (!gameStarted) return;
 
-  if (!isGameOver && !isPaused) {
+  if (!isPaused && !showingVictoryScreen) {
     update();
   }
   render();
 }
+
+
 
 
 
@@ -254,6 +337,31 @@ function displayBestResult(data) {
   }
 }
 
+function goToMainMenu() {
+  gameStarted = false;
+  isPaused = false;
+  isGameOver = false;
+
+  mainMenu.classList.remove("hidden");
+  gameContainer.classList.add("hidden");
+  controls.classList.add("hidden");
+  menuButton.classList.add("hidden");
+
+  player.score = 0;
+  ai.score = 0;
+  updateScoreboard();
+  resetBall();
+}
+
+function applyMuteState(muted) {
+  isMuted = muted;
+  Object.values(sounds).forEach(sound => sound.muted = muted);
+  const label = muted ? "Unmute" : "Mute";
+  muteToggle.textContent = label;
+  muteToggleMenu.textContent = label;
+  localStorage.setItem("pongMuted", muted);
+}
+
 function applyCustomColors(bgColor, fgColor) {
   document.documentElement.style.setProperty('--bg-color', bgColor);
   document.documentElement.style.setProperty('--fg-color', fgColor);
@@ -276,9 +384,11 @@ document.addEventListener("keydown", (evt) => {
   if (evt.key === "s" || evt.key === "S") player1Down = true;
   if (evt.key === "ArrowUp") player2Up = true;
   if (evt.key === "ArrowDown") player2Down = true;
-  if (evt.key === "Escape") {
-    isPaused = !isPaused;
-    pauseToggle.textContent = isPaused ? "Resume" : "Pause";
+   {
+   if (evt.key === "Escape") 
+     isPaused = !isPaused;
+     pauseToggle.textContent = isPaused ? "Resume" : "Pause";
+     menuButton.classList.toggle("hidden", !isPaused);
   }
 });
 
@@ -288,6 +398,18 @@ document.addEventListener("keyup", (evt) => {
   if (evt.key === "ArrowUp") player2Up = false;
   if (evt.key === "ArrowDown") player2Down = false;
 });
+
+document.body.addEventListener("click", () => {
+  // Create a silent audio to unlock autoplay policy
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const context = new AudioContext();
+  const buffer = context.createBuffer(1, 1, 22050); // 1 sample of silence
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  source.start(0);
+}, { once: true });
+
 
 canvas.addEventListener("click", () => {
   if (isGameOver) {
@@ -307,31 +429,59 @@ themeToggle.addEventListener("click", () => {
 pauseToggle.addEventListener("click", () => {
   isPaused = !isPaused;
   pauseToggle.textContent = isPaused ? "Resume" : "Pause";
+  menuButton.classList.toggle("hidden", !isPaused); // this must be here
 });
 
 gameContainer.classList.add("hidden");
 controls.classList.add("hidden");
 
-startGameBtn.addEventListener("click", () => 
-{
+startGameBtn.addEventListener("click", () => {
   mainMenu.classList.add("hidden");
   gameContainer.classList.remove("hidden");
   controls.classList.remove("hidden");
+
   gameStarted = true;
+  isGameOver = false;
+  isPaused = false;
+  showingVictoryScreen = false;
+
+  player1Name = player1NameInput.value.trim() || "Player 1";
+  player2Name = useAI ? "AI" : (player2NameInput.value.trim() || "Player 2");
+
+  localStorage.setItem("playerNames", JSON.stringify({ player1Name, player2Name }));
+
+  player.score = 0;
+  ai.score = 0;
+  updateScoreboard();
+  resetBall();
+  isWaiting = true;
   const bgColor = bgColorPicker.value;
   const fgColor = fgColorPicker.value;
   applyCustomColors(bgColor, fgColor);
 });
 
+muteToggle.addEventListener("click", () => {
+  applyMuteState(!isMuted);
+});
+
+muteToggleMenu.addEventListener("click", () => {
+  applyMuteState(!isMuted);
+});
+
 modeToggle.addEventListener("click", () => {
   useAI = !useAI;
   modeToggle.textContent = useAI ? "Switch to Multiplayer" : "Switch to AI";
-
+  player2Label.classList.toggle("hidden", useAI);
   // Reset scores
   player.score = 0;
   ai.score = 0;
   updateScoreboard();
   resetBall();
+});
+
+
+menuButton.addEventListener("click", () => {
+  goToMainMenu();
 });
 
 const savedBest = JSON.parse(localStorage.getItem("bestResult"));
@@ -349,5 +499,18 @@ if (savedColors) {
   fgColorPicker.value = savedColors.fgColor;
   applyCustomColors(savedColors.bgColor, savedColors.fgColor);
 }
+
+const savedNames = JSON.parse(localStorage.getItem("playerNames"));
+if (savedNames) {
+  player1Name = savedNames.player1Name;
+  player2Name = savedNames.player2Name;
+  player1NameInput.value = player1Name;
+  player2NameInput.value = player2Name;
+}
+
+player2Label.classList.toggle("hidden", useAI);
+
+const savedMute = localStorage.getItem("pongMuted") === "true";
+applyMuteState(savedMute);
 
 updateScoreboard();

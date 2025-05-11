@@ -122,3 +122,14 @@ canvas {
 #main-menu button {
     width: 200px;
 }
+
+#menuButton {
+  z-index: 10;
+  position: relative;
+}
+
+#main-menu input {
+  padding: 5px;
+  font-size: 16px;
+  margin-top: 5px;
+}

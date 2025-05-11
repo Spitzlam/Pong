@@ -20,6 +20,15 @@
   Paddle/Ball Color:
   <input type="color" id="fgColorPicker" value="#ffffff" />
   </label>
+  <label>
+  Player 1 Name:
+  <input type="text" id="player1NameInput" placeholder="Player 1" />
+  </label>
+  <label id="player2Label" class="hidden">
+  Player 2 Name:
+  <input type="text" id="player2NameInput" placeholder="Player 2" />
+  </label>
+  <button id="muteToggleMenu">Mute</button>
   <button id="startGame">Start Game</button>
   </div>
 
@@ -27,7 +36,9 @@
     <div id="scoreboard">Player: 0 — AI: 0</div>
     <div>
       <button id="pauseToggle">Pause</button>
+      <button id="muteToggle">Mute</button>
       <button id="themeToggle">Toggle Mode</button>
+      <button id="menuButton" class="hidden">Main Menu</button>
     </div>
   </div>
 
