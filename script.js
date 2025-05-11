@@ -117,9 +117,8 @@ function collision(b, p) {
 }
 
 function updateScoreboard() {
-    const opponentLabel = useAI ? "AI" : "Player 2";
-    scoreboard.textContent = `Player 1: ${player.score} — ${opponentLabel}: ${ai.score}`;
-  }
+  scoreboard.textContent = `${player1Name}: ${player.score} — ${player2Name}: ${ai.score}`;
+}
   
 
 function update() {
@@ -260,12 +259,15 @@ function render() {
 if (isGameOver) {
   drawText("Game Over", canvas.width / 2 - 90, canvas.height / 2);
 
-  let winnerMessage;
-  if (player.score > ai.score) {
-    winnerMessage = "Player 1 Wins!";
-  } else {
-    winnerMessage = useAI ? "AI Wins!" : "Player 2 Wins!";
-  }
+let winnerMessage;
+if (player.score > ai.score) 
+{
+  winnerMessage = `${player1Name} Wins!`;
+} 
+else 
+{
+  winnerMessage = `${player2Name} Wins!`;
+}
 
   drawText(winnerMessage, canvas.width / 2 - 100, canvas.height / 2 + 40);
   drawText("Returning to menu...", canvas.width / 2 - 110, canvas.height / 2 + 80, "20px");
