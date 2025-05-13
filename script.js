@@ -23,6 +23,7 @@ const sounds = {
   paddle: new Audio("sounds/pong.mp3"),
   wall: new Audio("sounds/bounce.mp3"),
   score: new Audio("sounds/score.mp3"),
+  win: new Audio("sounds/win.mp3")
 };
 
 const playerNameLeft = document.getElementById("playerNameLeft");
@@ -129,6 +130,8 @@ function update() {
   if (ai.score >= maxScore) {
   isGameOver = true;
   showingVictoryScreen = true;
+  sounds.win.currentTime = 0;
+  sounds.win.play();
   updateBestResult();
   setTimeout(() => 
   {
@@ -143,6 +146,8 @@ function update() {
   if (player.score >= maxScore) {
   isGameOver = true;
   showingVictoryScreen = true;
+  sounds.win.currentTime = 0;
+  sounds.win.play();
   updateBestResult();
   setTimeout(() => 
   {
