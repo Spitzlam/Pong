@@ -10,7 +10,7 @@ const menuButton = document.getElementById("menuButton");
 const mainMenu = document.getElementById("main-menu");
 const startGameBtn = document.getElementById("startGame");
 const bestDisplay = document.getElementById("bestDisplay");
-const gameContainer = document.getElementById("game-container");
+const gameWrapper = document.getElementById("game-wrapper");
 const controls = document.getElementById("controls");
 
 const paddleWidth = 14, paddleHeight = 100;
@@ -24,6 +24,9 @@ const sounds = {
   wall: new Audio("sounds/bounce.mp3"),
   score: new Audio("sounds/score.mp3"),
 };
+
+const playerNameLeft = document.getElementById("playerNameLeft");
+const playerNameRight = document.getElementById("playerNameRight");
 
 const bgColorPicker = document.getElementById("bgColorPicker");
 const fgColorPicker = document.getElementById("fgColorPicker");
@@ -289,10 +292,6 @@ function game() {
   render();
 }
 
-
-
-
-
 function gameLoop(currentTime) {
   if (!lastFrameTime) {
     lastFrameTime = currentTime;
@@ -345,7 +344,7 @@ function goToMainMenu() {
   isGameOver = false;
 
   mainMenu.classList.remove("hidden");
-  gameContainer.classList.add("hidden");
+  gameWrapper.classList.add("hidden");
   controls.classList.add("hidden");
   menuButton.classList.add("hidden");
 
@@ -365,6 +364,11 @@ function applyMuteState(muted) {
 }
 
 function applyCustomColors(bgColor, fgColor) {
+  if (bgColor.toLowerCase() === fgColor.toLowerCase()) {
+    alert("Background and paddle/ball colors must be different!");
+    return; // Don't apply or save invalid colors
+  }
+
   document.documentElement.style.setProperty('--bg-color', bgColor);
   document.documentElement.style.setProperty('--fg-color', fgColor);
   document.documentElement.style.setProperty('--border-color', fgColor);
@@ -434,12 +438,12 @@ pauseToggle.addEventListener("click", () => {
   menuButton.classList.toggle("hidden", !isPaused); // this must be here
 });
 
-gameContainer.classList.add("hidden");
+gameWrapper.classList.add("hidden");
 controls.classList.add("hidden");
 
 startGameBtn.addEventListener("click", () => {
   mainMenu.classList.add("hidden");
-  gameContainer.classList.remove("hidden");
+  gameWrapper.classList.remove("hidden");
   controls.classList.remove("hidden");
 
   gameStarted = true;
@@ -450,6 +454,9 @@ startGameBtn.addEventListener("click", () => {
   player1Name = player1NameInput.value.trim() || "Player 1";
   player2Name = useAI ? "AI" : (player2NameInput.value.trim() || "Player 2");
 
+  playerNameLeft.textContent = player1Name;
+  playerNameRight.textContent = player2Name;
+
   localStorage.setItem("playerNames", JSON.stringify({ player1Name, player2Name }));
 
   player.score = 0;
@@ -457,6 +464,7 @@ startGameBtn.addEventListener("click", () => {
   updateScoreboard();
   resetBall();
   isWaiting = true;
+  
   const bgColor = bgColorPicker.value;
   const fgColor = fgColorPicker.value;
   applyCustomColors(bgColor, fgColor);
@@ -484,6 +492,18 @@ modeToggle.addEventListener("click", () => {
 
 menuButton.addEventListener("click", () => {
   goToMainMenu();
+});
+
+bgColorPicker.addEventListener("input", () => {
+  const bgColor = bgColorPicker.value;
+  const fgColor = fgColorPicker.value;
+  applyCustomColors(bgColor, fgColor);
+});
+
+fgColorPicker.addEventListener("input", () => {
+  const bgColor = bgColorPicker.value;
+  const fgColor = fgColorPicker.value;
+  applyCustomColors(bgColor, fgColor);
 });
 
 const savedBest = JSON.parse(localStorage.getItem("bestResult"));

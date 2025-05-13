@@ -30,12 +30,15 @@ body {
 }
   
 #controls {
-    display: flex;
-    justify-content: space-between;
-    width: 800px;
-    margin-top: 20px;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
+
   
 button {
     padding: 10px 20px;
@@ -46,10 +49,6 @@ button {
     font-weight: bold;
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease;
-}
-  
-#scoreboard {
-    font-size: 24px;
 }
   
 canvas {
@@ -99,6 +98,18 @@ canvas {
         width: 100%;
         max-width: 100%;
     }
+
+    button,
+    input[type="color"] 
+    {
+        background-color: var(--fg-color);
+        color: var(--bg-color);
+    }
+}
+
+#scoreboard {
+    font-size: 24px;
+    text-align: center;
 }
 
 #main-menu {
@@ -132,4 +143,42 @@ canvas {
   padding: 5px;
   font-size: 16px;
   margin-top: 5px;
+}
+
+#controlButtons {
+  display: flex;
+  gap: 10px;
+}
+
+#game-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.player-name {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--fg-color);
+  pointer-events: none;
+  z-index: 10;
+}
+
+#playerNameLeft {
+  left: -120px; /* adjust spacing from canvas edge */
+  text-align: right;
+  width: 100px;
+}
+
+#playerNameRight {
+  right: -120px;
+  text-align: left;
+  width: 100px;
 }

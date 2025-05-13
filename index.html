@@ -32,20 +32,24 @@
   <button id="startGame">Start Game</button>
   </div>
 
-  <div id="controls">
-    <div id="scoreboard">Player: 0 — AI: 0</div>
-    <div>
-      <button id="pauseToggle">Pause</button>
-      <button id="muteToggle">Mute</button>
-      <button id="themeToggle">Toggle Mode</button>
-      <button id="menuButton" class="hidden">Main Menu</button>
-    </div>
+<div id="controls">
+  <div id="scoreboard">Player 1: 0 — AI: 0</div>
+  <div id="controlButtons">
+    <button id="pauseToggle">Pause</button>
+    <button id="muteToggle">Mute</button>
+    <button id="themeToggle">Toggle Mode</button>
+    <button id="menuButton" class="hidden">Main Menu</button>
   </div>
+</div>
 
+<!-- Wrap canvas and name overlays in a positioned container -->
+<div id="game-wrapper">
+  <div id="playerNameLeft" class="player-name">Player 1</div>
+  <div id="playerNameRight" class="player-name">Player 2</div>
   <div id="game-container">
-  <canvas id="pong" width="1000" height="600"></canvas>
+    <canvas id="pong" width="1000" height="600"></canvas>
   </div>
-
+</div>
 
   <script src="script.js"></script>
 </body>
