@@ -377,6 +377,18 @@ function applyCustomColors(bgColor, fgColor) {
   localStorage.setItem("pongColors", JSON.stringify({ bgColor, fgColor }));
 }
 
+function validateColorSelection() {
+  const bgColor = bgColorPicker.value.toLowerCase();
+  const fgColor = fgColorPicker.value.toLowerCase();
+  const colorsMatch = bgColor === fgColor;
+
+  startGameBtn.disabled = colorsMatch;
+  startGameBtn.style.opacity = colorsMatch ? "0.5" : "1";
+  startGameBtn.title = colorsMatch
+    ? "Background and paddle/ball colors must be different"
+    : "";
+}
+
 document.addEventListener("mousemove", (evt) => {
   if (isPaused || isGameOver || !useAI) return;
   const rect = canvas.getBoundingClientRect();
@@ -464,7 +476,7 @@ startGameBtn.addEventListener("click", () => {
   updateScoreboard();
   resetBall();
   isWaiting = true;
-  
+
   const bgColor = bgColorPicker.value;
   const fgColor = fgColorPicker.value;
   applyCustomColors(bgColor, fgColor);
@@ -498,12 +510,14 @@ bgColorPicker.addEventListener("input", () => {
   const bgColor = bgColorPicker.value;
   const fgColor = fgColorPicker.value;
   applyCustomColors(bgColor, fgColor);
+  validateColorSelection(); // ✅ added
 });
 
 fgColorPicker.addEventListener("input", () => {
   const bgColor = bgColorPicker.value;
   const fgColor = fgColorPicker.value;
   applyCustomColors(bgColor, fgColor);
+  validateColorSelection(); // ✅ added
 });
 
 const savedBest = JSON.parse(localStorage.getItem("bestResult"));
@@ -534,5 +548,7 @@ player2Label.classList.toggle("hidden", useAI);
 
 const savedMute = localStorage.getItem("pongMuted") === "true";
 applyMuteState(savedMute);
+
+validateColorSelection();
 
 updateScoreboard();
