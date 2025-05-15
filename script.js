@@ -35,7 +35,7 @@ const fgColorPicker = document.getElementById("fgColorPicker");
 const muteToggle = document.getElementById("muteToggle");
 const muteToggleMenu = document.getElementById("muteToggleMenu");
 
-const TARGET_FPS = 165;
+const TARGET_FPS = 60;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 
 const player1NameInput = document.getElementById("player1NameInput");
