@@ -15,7 +15,7 @@ const controls = document.getElementById("controls");
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
-const maxScore = 5;
+const maxScore = 10;
 const maxBallSpeed = 17;
 const paddleSpeed = 8;
 
