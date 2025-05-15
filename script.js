@@ -15,7 +15,7 @@ const controls = document.getElementById("controls");
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
-const maxScore = 10;
+const maxScore = 3;
 const maxBallSpeed = 17;
 const paddleSpeed = 8;
 
@@ -35,7 +35,7 @@ const fgColorPicker = document.getElementById("fgColorPicker");
 const muteToggle = document.getElementById("muteToggle");
 const muteToggleMenu = document.getElementById("muteToggleMenu");
 
-const TARGET_FPS = 60;
+const TARGET_FPS = undefined;
 const FRAME_DURATION = 1000 / TARGET_FPS;
 
 const player1NameInput = document.getElementById("player1NameInput");
