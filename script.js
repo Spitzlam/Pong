@@ -74,6 +74,12 @@ let player1Down = false;
 let player2Up = false;
 let player2Down = false;
 
+let lastPlayerY = player.y;
+let lastAIY = ai.y;
+let playerVelocity = 0;
+let aiVelocity = 0;
+
+
 let ball = {
   x: canvas.width / 2,
   y: canvas.height / 2,
@@ -191,6 +197,13 @@ if (isWaiting) {
     // Clamp both paddles
     player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
     ai.y = Math.max(0, Math.min(canvas.height - paddleHeight, ai.y));
+    // Track paddle velocities
+    playerVelocity = player.y - lastPlayerY;
+    lastPlayerY = player.y;
+
+    aiVelocity = ai.y - lastAIY;
+    lastAIY = ai.y;
+
   } else {
     // AI control
     ai.y += (ball.y - (ai.y + paddleHeight / 2)) * 0.1;
@@ -229,6 +242,10 @@ if (isWaiting) {
     let direction = (ball.x < canvas.width / 2) ? 1 : -1;
     ball.velocityX = direction * ball.speed * Math.cos(angleRad);
     ball.velocityY = ball.speed * Math.sin(angleRad);
+    const paddleVel = (playerPaddle === player) ? playerVelocity : aiVelocity;
+    ball.velocityY += paddleVel * 0.2; // Tweak this multiplier as needed
+    const maxY = ball.speed;
+    ball.velocityY = Math.max(-maxY, Math.min(maxY, ball.velocityY));
     ball.speed = Math.min(ball.speed + 0.5, maxBallSpeed);
   }
 
