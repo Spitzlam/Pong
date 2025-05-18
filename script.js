@@ -337,7 +337,7 @@ function updateBestResult() {
 }
 
 function displayBestResult(data) {
-  const bestDiv = document.getElementById("bestResult");
+  const bestDiv = document.getElementById("bestDisplay"); // Fix this line
   if (data) {
     bestDiv.textContent = `Best Win: ${data.winner} scored ${data.score} (diff ${data.difference})`;
   } else {
