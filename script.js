@@ -15,7 +15,7 @@ const controls = document.getElementById("controls");
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
-const maxScore = 3;
+let maxScore = 3;
 const maxBallSpeed = 17;
 const paddleSpeed = 8;
 
@@ -25,6 +25,8 @@ const sounds = {
   score: new Audio("sounds/score.mp3"),
   win: new Audio("sounds/win.mp3")
 };
+
+const scoreLimitInput = document.getElementById("scoreLimitInput");
 
 const playerNameLeft = document.getElementById("playerNameLeft");
 const playerNameRight = document.getElementById("playerNameRight");
@@ -459,6 +461,8 @@ gameWrapper.classList.add("hidden");
 controls.classList.add("hidden");
 
 startGameBtn.addEventListener("click", () => {
+  const chosenScore = parseInt(scoreLimitInput.value);
+  maxScore = isNaN(chosenScore) ? 3 : Math.min(10, Math.max(1, chosenScore));
   mainMenu.classList.add("hidden");
   gameWrapper.classList.remove("hidden");
   controls.classList.remove("hidden");
