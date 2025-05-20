@@ -12,6 +12,9 @@ const startGameBtn = document.getElementById("startGame");
 const bestDisplay = document.getElementById("bestDisplay");
 const gameWrapper = document.getElementById("game-wrapper");
 const controls = document.getElementById("controls");
+const controlModeSelect = document.getElementById("controlModeSelect");
+const controlModeToggle = document.getElementById("controlModeToggle");
+
 
 const paddleWidth = 14, paddleHeight = 100;
 const ballSize = 10;
@@ -79,6 +82,12 @@ let lastAIY = ai.y;
 let playerVelocity = 0;
 let aiVelocity = 0;
 
+let controlMode = "mouse"; // default
+
+function updateControlModeUI() {
+  controlModeToggle.textContent = `Control: ${controlMode === "mouse" ? "Mouse" : "W/S Keys"}`;
+  localStorage.setItem("pongControlMode", controlMode);
+}
 
 let ball = {
   x: canvas.width / 2,
@@ -205,14 +214,23 @@ if (isWaiting) {
     aiVelocity = ai.y - lastAIY;
     lastAIY = ai.y;
 
-  } else {
+  } 
+  else 
+  {
     // AI control
     ai.y += (ball.y - (ai.y + paddleHeight / 2)) * 0.1;
     ai.y = Math.max(0, Math.min(canvas.height - paddleHeight, ai.y));
 
     // Clamp Player 1 (in case user moves mouse too far)
-    player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
+    if (controlMode === "keyboard") 
+    {
+      if (player1Up) player.y -= paddleSpeed;
+      if (player1Down) player.y += paddleSpeed;
+    }
   }
+// Clamp paddle regardless of control method
+player.y = Math.max(0, Math.min(canvas.height - paddleHeight, player.y));
+
 
   // Ball movement and collisions remain unchanged
   ball.x += ball.velocityX;
@@ -415,7 +433,7 @@ function validateColorSelection() {
 }
 
 document.addEventListener("mousemove", (evt) => {
-  if (isPaused || isGameOver || !useAI) return;
+  if (isPaused || isGameOver || !useAI || controlMode !== "mouse") return;
   const rect = canvas.getBoundingClientRect();
   const scaleY = canvas.height / rect.height;
   player.y = (evt.clientY - rect.top) * scaleY - paddleHeight / 2;
@@ -440,6 +458,11 @@ document.addEventListener("keyup", (evt) => {
   if (evt.key === "s" || evt.key === "S") player1Down = false;
   if (evt.key === "ArrowUp") player2Up = false;
   if (evt.key === "ArrowDown") player2Down = false;
+});
+
+controlModeToggle.addEventListener("click", () => {
+  controlMode = (controlMode === "mouse") ? "keyboard" : "mouse";
+  updateControlModeUI();
 });
 
 document.body.addEventListener("click", () => {
@@ -479,11 +502,12 @@ gameWrapper.classList.add("hidden");
 controls.classList.add("hidden");
 
 startGameBtn.addEventListener("click", () => {
+  controlMode = localStorage.getItem("pongControlMode") || "mouse";
   const chosenScore = parseInt(scoreLimitInput.value);
   maxScore = isNaN(chosenScore) ? 3 : Math.min(10, Math.max(1, chosenScore));
   mainMenu.classList.add("hidden");
   gameWrapper.classList.remove("hidden");
-  controls.classList.remove("hidden");
+  controls.classList.toggle("hidden", !useAI);
 
   gameStarted = true;
   isGameOver = false;
@@ -491,7 +515,7 @@ startGameBtn.addEventListener("click", () => {
   showingVictoryScreen = false;
 
   player1Name = player1NameInput.value.trim() || "Player 1";
-  player2Name = useAI ? "AI" : (player2NameInput.value.trim() || "Player 2");
+  player2Name = useAI ? "AI" : player2NameInput.value.trim();
 
   playerNameLeft.textContent = player1Name;
   playerNameRight.textContent = player2Name;
@@ -519,15 +543,15 @@ muteToggleMenu.addEventListener("click", () => {
 
 modeToggle.addEventListener("click", () => {
   useAI = !useAI;
+  controlModeToggle.classList.toggle("hidden", !useAI);
   modeToggle.textContent = useAI ? "Switch to Multiplayer" : "Switch to AI";
   player2Label.classList.toggle("hidden", useAI);
-  // Reset scores
+  controls.classList.toggle("hidden", !useAI); // 🔧 add this line
   player.score = 0;
   ai.score = 0;
   updateScoreboard();
   resetBall();
 });
-
 
 menuButton.addEventListener("click", () => {
   goToMainMenu();
@@ -571,7 +595,17 @@ if (savedNames) {
   player2NameInput.value = player2Name;
 }
 
+const savedControlMode = localStorage.getItem("pongControlMode");
+if (savedControlMode === "mouse" || savedControlMode === "keyboard") {
+  controlMode = savedControlMode;
+  controlModeSelect.value = savedControlMode;
+} else {
+  controlMode = "mouse"; // default fallback
+  controlModeSelect.value = "mouse";
+}
+
 player2Label.classList.toggle("hidden", useAI);
+controlModeToggle.classList.toggle("hidden", !useAI);
 
 const savedMute = localStorage.getItem("pongMuted") === "true";
 applyMuteState(savedMute);
