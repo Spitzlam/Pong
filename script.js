@@ -120,11 +120,12 @@ function resetBall() {
 }
 
 function collision(b, p) {
+  const diameter = b.size * 2;
   return (
-    b.x < p.x + paddleWidth &&
-    b.x + ballSize > p.x &&
-    b.y < p.y + paddleHeight &&
-    b.y + ballSize > p.y
+    b.x - b.size < p.x + paddleWidth &&
+    b.x + b.size > p.x &&
+    b.y - b.size < p.y + paddleHeight &&
+    b.y + b.size > p.y
   );
 }
 
